@@ -27,6 +27,9 @@ benchmark:
 node:
 	npx hardhat node
 
+node-deploy:
+	npx hardhat run --network localhost scripts/deploy.js
+
 test:
 	RUNS=10 VIAIR=true npx hardhat --network localhost test
 	
@@ -42,4 +45,4 @@ deps:
 ci:
 	npm ci
 
-.PHONY: check build clean test test-gas test-coverage lint lint-fix deps build-size check ci node benchmark
+.PHONY: check build clean test test-gas test-coverage lint lint-fix deps build-size check ci node benchmark node-deploy
