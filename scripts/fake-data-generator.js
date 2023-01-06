@@ -27,12 +27,15 @@ async function main() {
     fs.writeFileSync('scripts/fake-governance-pk-set.json', JSON.stringify(mnemonicSet))
 }
 
-
 const normalizePowers = (powers, max = Math.pow(2, 32)) => {
     const sum = powers.reduce((a, b) => a + b, 0);
-    const normalizedPowersOverSum = powers.map(power => power / sum);
-    
-    return normalizedPowersOverSum.map(power => Math.round(power * max)).sort().reverse();
+    let votingPowers;
+    let totalPower;
+    do {
+        votingPowers = powers.map(power => Math.round(power * max / sum)).sort().reverse();
+        totalPower = votingPowers.reduce((x, y) => x + y, 0);
+    } while (totalPower > max--);
+    return votingPowers;
 }
 
 function randomInteger(min, max) {
