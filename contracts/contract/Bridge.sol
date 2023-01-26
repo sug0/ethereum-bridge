@@ -16,7 +16,6 @@ contract Bridge is IBridge, ReentrancyGuard {
     uint256 private immutable thresholdVotingPower;
 
     bytes32 public currentValidatorSetHash;
-    bytes32 public nextValidatorSetHash;
 
     uint256 private transferToERC20Nonce = 0;
     uint256 private transferToNamadaNonce = 0;
@@ -47,7 +46,6 @@ contract Bridge is IBridge, ReentrancyGuard {
         version = _version;
         thresholdVotingPower = _thresholdVotingPower;
         currentValidatorSetHash = _computeValidatorSetHash(_currentValidators, _currentPowers, 0);
-        nextValidatorSetHash = _computeValidatorSetHash(_nextValidators, _nextPowers, 0);
 
         for (uint256 i = 0; i < _tokenList.length; ++i) {
             address tokenAddress = _tokenList[i];
@@ -145,8 +143,7 @@ contract Bridge is IBridge, ReentrancyGuard {
     }
 
     function updateValidatorSetHash(bytes32 _validatorSetHash) external onlyLatestGovernanceContract {
-        currentValidatorSetHash = nextValidatorSetHash;
-        nextValidatorSetHash = _validatorSetHash;
+        currentValidatorSetHash = _validatorSetHash;
     }
 
     function updateTokenWhitelist(address[] calldata _tokens, uint256[] calldata _tokensCap)
