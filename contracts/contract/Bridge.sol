@@ -11,6 +11,8 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
+import "hardhat/console.sol";
+
 contract Bridge is IBridge, ReentrancyGuard {
     uint8 private immutable version;
     uint256 private immutable thresholdVotingPower;
@@ -63,12 +65,16 @@ contract Bridge is IBridge, ReentrancyGuard {
         Signature[] calldata _signatures,
         bytes32 _message
     ) external view returns (bool) {
+        console.log("Authorizing first cond...");
         require(_isValidSignatureSet(_validatorSetArgs, _signatures), "Mismatch array length.");
+        console.log("Authorizing second cond...");
         require(
             _computeValidatorSetHash(_validatorSetArgs) == currentValidatorSetHash,
             "Invalid currentValidatorSetHash."
         );
+        console.log("Authorized conds!");
 
+        console.log("Checking voting powers and sigs...");
         return checkValidatorSetVotingPowerAndSignature(_validatorSetArgs, _signatures, _message);
     }
 
@@ -167,6 +173,9 @@ contract Bridge is IBridge, ReentrancyGuard {
         uint256 powerAccumulator = 0;
 
         for (uint256 i = 0; i < validatorSet.powers.length; i++) {
+            console.log("Checking signature of:");
+            console.logBytes(abi.encodePacked(validatorSet.validators[i]));
+            console.logBytes(abi.encodePacked(validatorSet.powers[i]));
             if (!isValidSignature(validatorSet.validators[i], _messageHash, _signatures[i])) {
                 return false;
             }
@@ -187,7 +196,7 @@ contract Bridge is IBridge, ReentrancyGuard {
         address _signer,
         bytes32 _messageHash,
         Signature calldata _signature
-    ) internal pure returns (bool) {
+    ) internal view returns (bool) {
         bytes32 messageDigest = keccak256(abi.encodePacked(
             "\x19Ethereum Signed Message:\n32",
             _messageHash
@@ -198,10 +207,24 @@ contract Bridge is IBridge, ReentrancyGuard {
             _signature.r,
             _signature.s
         );
+        //address signer = ecrecover(messageDigest, _signature.v, _signature.r, _signature.s);
+        //ECDSA.RecoverError error = ECDSA.RecoverError.NoError;
+        console.log("Sig verify error:");
+        console.logBytes(abi.encodePacked(error));
+        console.log("Expected address:");
+        console.logBytes(abi.encodePacked(_signer));
+        console.log("Got address:");
+        console.logBytes(abi.encodePacked(signer));
         return error == ECDSA.RecoverError.NoError && _signer == signer;
     }
 
     function _computeValidatorSetHash(ValidatorSetArgs calldata validatorSetArgs) internal view returns (bytes32) {
+        console.log("Validator set hash validators:");
+        console.logBytes(abi.encodePacked(validatorSetArgs.validators));
+        console.log("Validator set hash powers:");
+        console.logBytes(abi.encodePacked(validatorSetArgs.powers));
+        console.log("Validator set hash nonce:");
+        console.logBytes(abi.encodePacked(validatorSetArgs.nonce));
         return
             keccak256(
                 abi.encode(
@@ -236,6 +259,12 @@ contract Bridge is IBridge, ReentrancyGuard {
         uint256[] memory powers,
         uint256 nonce
     ) internal view returns (bytes32) {
+        console.log("Validator set hash validators:");
+        console.logBytes(abi.encodePacked(validators));
+        console.log("Validator set hash powers:");
+        console.logBytes(abi.encodePacked(powers));
+        console.log("Validator set hash nonce:");
+        console.logBytes(abi.encodePacked(nonce));
         return keccak256(abi.encode(version, "bridge", validators, powers, nonce));
     }
 

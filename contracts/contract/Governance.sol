@@ -9,6 +9,8 @@ import "../interface/ICommon.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
+import "hardhat/console.sol";
+
 contract Governance is IGovernance, ReentrancyGuard {
     uint8 private immutable version;
     uint256 private immutable thresholdVotingPower;
@@ -109,6 +111,23 @@ contract Governance is IGovernance, ReentrancyGuard {
                 nonce
             )
         );
+        console.log("New validator set hash:");
+        console.logBytes(abi.encodePacked(messageHash));
+
+        console.log("Governance version:");
+        console.logBytes(abi.encodePacked(version));
+
+        console.log("Bridge hash:");
+        console.logBytes(abi.encodePacked(_bridgeValidatorSetHash));
+
+        console.log("Gov hash:");
+        console.logBytes(abi.encodePacked(_governanceValidatorSetHash));
+
+        console.log("Prev epoch:");
+        console.logBytes(abi.encodePacked(validatorSetNonce));
+
+        console.log("New epoch:");
+        console.logBytes(abi.encodePacked(nonce));
 
         validatorSetNonce = nonce;
 
@@ -173,7 +192,7 @@ contract Governance is IGovernance, ReentrancyGuard {
         address _signer,
         bytes32 _messageHash,
         Signature calldata _signature
-    ) internal pure returns (bool) {
+    ) internal view returns (bool) {
         bytes32 messageDigest = keccak256(abi.encodePacked(
             "\x19Ethereum Signed Message:\n32",
             _messageHash
@@ -184,6 +203,14 @@ contract Governance is IGovernance, ReentrancyGuard {
             _signature.r,
             _signature.s
         );
+        //address signer = ecrecover(messageDigest, _signature.v, _signature.r, _signature.s);
+        //ECDSA.RecoverError error = ECDSA.RecoverError.NoError;
+        console.log("Sig verify error:");
+        console.logBytes(abi.encodePacked(error));
+        console.log("Expected address:");
+        console.logBytes(abi.encodePacked(_signer));
+        console.log("Got address:");
+        console.logBytes(abi.encodePacked(signer));
         return error == ECDSA.RecoverError.NoError && _signer == signer;
     }
 
