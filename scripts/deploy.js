@@ -132,10 +132,10 @@ async function main() {
     const tokenWhitelist = tokenWhitelistPrompt.length == 0 ? [wnamToken.address] : tokenWhitelistPrompt.split(',').map(token => token.trim()).concat(wnamToken.address)
     const tokenCaps = tokenCapsPrompt.length == 0 ? [wnamTokenSupply] : tokenCapsPrompt.split(',').map(cap => parseInt(cap)).concat(wnamTokenSupply)
 
-    const bridge = await Bridge.deploy(0, bridgeValidators, bridgeVotingPowers, nextBridgeValidators, nextBridgeVotingPowers, tokenWhitelist, tokenCaps, bridgeVotingPowerThreshold, proxy.address);
+    const bridge = await Bridge.deploy(1, bridgeValidators, bridgeVotingPowers, nextBridgeValidators, nextBridgeVotingPowers, tokenWhitelist, tokenCaps, bridgeVotingPowerThreshold, proxy.address);
     await bridge.deployed();
 
-    const governance = await Governance.deploy(0, governanceValidators, governanceVotingPowers, governanceVotingPowerThreshold, proxy.address);
+    const governance = await Governance.deploy(1, governanceValidators, governanceVotingPowers, governanceVotingPowerThreshold, proxy.address);
     await governance.deployed()
 
     await proxy.addContract("governance", governance.address);
