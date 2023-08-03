@@ -180,9 +180,7 @@ contract Bridge is IBridge, ReentrancyGuard {
                     transfer.from,
                     transfer.to,
                     transfer.amount,
-                    transfer.feeFrom,
-                    transfer.fee,
-                    transfer.sender
+                    transfer.namadaDataDigest
                 )
             );
     }

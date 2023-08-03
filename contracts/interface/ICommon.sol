@@ -20,19 +20,11 @@ interface ICommon {
         string to;
     }
 
-    enum Erc20TransferKind {
-        ERC20,
-        NUT
-    }
-
     struct Erc20Transfer {
-        Erc20TransferKind kind;
         address from;
         address to;
         uint256 amount;
-        string feeFrom;
-        uint256 fee;
-        string sender;
+        bytes32 namadaDataDigest;
     }
 
     struct RelayProof {
