@@ -236,6 +236,8 @@ async function deploy(config) {
     console.log(`wNAM token address: ${wnamToken.address}`)
     console.log("")
 
+    await maybeDeployTestERC20(hre.network.name);
+
     await etherscan(proxy.address, proxyInitArgs, hre.network.name);
     await etherscan(governance.address, governanceInitArgs, hre.network.name);
     await etherscan(bridge.address, bridgeInitArgs, hre.network.name);
@@ -257,6 +259,36 @@ async function deploy(config) {
         hre.network.name,
         hre.network.config.chainId,
     );
+}
+
+async function maybeDeployTestERC20(networkName) {
+    const TEST_ERC20_TOTAL_SUPPLY = 10_000;
+
+    if (networkName != 'localhost') {
+        return
+    }
+
+    console.log('Deploying TestERC20...');
+
+    const TestERC20 = await ethers.getContractFactory("TestERC20");
+
+    const testErc20InitArgs = [];
+    const testErc20 = await TestERC20.deploy(...testErc20InitArgs);
+    await testErc20.deployed();
+
+    console.log(`TestERC20 token address: ${testErc20.address}`)
+    console.log('');
+
+    //==========================================================
+
+    const [deployer] = await ethers.getSigners();
+    console.log(`Minting ${TEST_ERC20_TOTAL_SUPPLY} of TestERC20 to ${deployer.address}`);
+
+    await testErc20.mint(deployer.address, TEST_ERC20_TOTAL_SUPPLY);
+    const balance = await testErc20.balanceOf(deployer.address);
+
+    console.log(`Balance of ${deployer.address}: ${balance}`);
+    console.log('');
 }
 
 function constructStateContent(proxyAddress, governanceAddress, bridgeAddress, wnamAddress, networkName, networkChainId) {
