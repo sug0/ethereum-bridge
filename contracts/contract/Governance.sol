@@ -10,6 +10,8 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 contract Governance is IGovernance, ReentrancyGuard {
+    uint256 private constant MAX_UINT = 2 ** 256 - 1;
+
     uint8 private immutable version;
     uint256 private immutable thresholdVotingPower;
 
@@ -35,7 +37,7 @@ contract Governance is IGovernance, ReentrancyGuard {
 
         version = _version;
         thresholdVotingPower = _thresholdVotingPower;
-        currentValidatorSetHash = _computeValidatorSetHash(_currentValidators, _currentPowers, 0);
+        currentValidatorSetHash = _computeValidatorSetHash(_currentValidators, _currentPowers, MAX_UINT);
         nextValidatorSetHash = _computeValidatorSetHash(_nextValidators, _nextPowers, 0);
 
         proxy = IProxy(_proxy);
@@ -109,7 +111,7 @@ contract Governance is IGovernance, ReentrancyGuard {
 
         validatorSetNonce = nonce;
 
-        require(bridge.authorize(_currentValidatorSetArgs, _signatures, messageHash), "Unauthorized.");
+        require(bridge.authorizeNext(_currentValidatorSetArgs, _signatures, messageHash), "Unauthorized.");
 
         currentValidatorSetHash = nextValidatorSetHash;
         nextValidatorSetHash = _governanceValidatorSetHash;

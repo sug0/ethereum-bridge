@@ -14,6 +14,12 @@ interface IBridge is ICommon {
         bytes32 message
     ) external view returns (bool);
 
+    function authorizeNext(
+        ValidatorSetArgs calldata validatorSetArgs,
+        Signature[] calldata signatures,
+        bytes32 message
+    ) external view returns (bool);
+
     function transferToNamada(NamadaTransfer[] calldata transfers, uint256 confirmations) external;
 
     function transferToErc(RelayProof calldata relayProof) external;

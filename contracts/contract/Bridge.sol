@@ -11,6 +11,8 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract Bridge is IBridge, ReentrancyGuard {
+    uint256 private constant MAX_UINT = 2 ** 256 - 1;
+
     uint8 private immutable version;
     uint256 private immutable thresholdVotingPower;
 
@@ -38,7 +40,7 @@ contract Bridge is IBridge, ReentrancyGuard {
 
         version = _version;
         thresholdVotingPower = _thresholdVotingPower;
-        currentValidatorSetHash = _computeValidatorSetHash(_currentValidators, _currentPowers, 0);
+        currentValidatorSetHash = _computeValidatorSetHash(_currentValidators, _currentPowers, MAX_UINT);
         nextValidatorSetHash = _computeValidatorSetHash(_nextValidators, _nextPowers, 0);
 
         proxy = IProxy(_proxy);
@@ -53,6 +55,20 @@ contract Bridge is IBridge, ReentrancyGuard {
         require(
             _computeValidatorSetHash(_validatorSetArgs) == currentValidatorSetHash,
             "Invalid currentValidatorSetHash."
+        );
+
+        return checkValidatorSetVotingPowerAndSignature(_validatorSetArgs, _signatures, _message);
+    }
+
+    function authorizeNext(
+        ValidatorSetArgs calldata _validatorSetArgs,
+        Signature[] calldata _signatures,
+        bytes32 _message
+    ) external view returns (bool) {
+        require(_isValidSignatureSet(_validatorSetArgs, _signatures), "Mismatch array length.");
+        require(
+            _computeValidatorSetHash(_validatorSetArgs) == nextValidatorSetHash,
+            "Invalid nextValidatorSetHash."
         );
 
         return checkValidatorSetVotingPowerAndSignature(_validatorSetArgs, _signatures, _message);
