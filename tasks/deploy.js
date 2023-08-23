@@ -231,6 +231,7 @@ async function deploy(config) {
 
     console.log("")
     console.log(`Proxy address: ${proxy.address}`)
+    console.log(`Vault address: ${vault.address}`)
     console.log(`Governance address: ${governance.address}`)
     console.log(`Bridge address: ${bridge.address}`)
     console.log(`wNAM token address: ${wnamToken.address}`)
